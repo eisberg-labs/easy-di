@@ -26,14 +26,12 @@
 //!
 //! ```
 //!
+use crate::service_provider_extensions::ServiceProviderExtensions;
 use std::borrow::Borrow;
 use std::sync::{Mutex, MutexGuard};
-use crate::service_provider_extensions::ServiceProviderExtensions;
 
-
-mod service_provider_extensions;
 pub mod service_provider;
-mod tests;
+mod service_provider_extensions;
 
 pub use service_provider::ServiceProvider;
 
@@ -57,5 +55,35 @@ impl Container {
 impl ServiceProvider for Container {
     fn extensions(&self) -> MutexGuard<'_, ServiceProviderExtensions> {
         self.extensions.borrow().lock().unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Container, ServiceProvider};
+    use std::sync::Arc;
+
+    pub trait Animal {
+        fn make_sound(&self);
+    }
+
+    #[derive(Clone)]
+    struct Dog;
+
+    impl Animal for Dog {
+        fn make_sound(&self) {
+            println!("woof woof!")
+        }
+    }
+
+    #[test]
+    fn test_dependency_is_injected() {
+        let mut container = Container::new();
+        let animal: Arc<dyn Animal + Sync + Send> = Arc::new(Dog);
+        container.inject(animal.clone());
+
+        let animal2 = container.find::<Arc<dyn Animal + Sync + Send>>();
+
+        assert!(animal2.is_ok())
     }
 }
