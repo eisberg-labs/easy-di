@@ -17,11 +17,13 @@ impl Animal for Dog {
         println!("woof woof!")
     }
 }
-let mut container = Container::new();
-let animal: Arc<dyn Animal + Sync + Send> = Arc::new(Dog);
-container.inject(animal);
-let animal2 = container.find::<Arc<dyn Animal + Sync + Send>>();
-animal2.unwrap().make_sound();
+
+fn main() {
+    let mut container = Container::new();
+    let animal: Arc<dyn Animal + Sync + Send> = Arc::new(Dog);
+    container.inject(animal);
+    let animal2 = container.find::<Arc<dyn Animal + Sync + Send>>();
+    animal2.unwrap().make_sound();
 }
 ```
 
