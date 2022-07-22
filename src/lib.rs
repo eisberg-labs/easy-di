@@ -26,14 +26,15 @@
 //!
 //! ```
 //!
-use crate::service_provider_extensions::ServiceProviderExtensions;
 use std::borrow::Borrow;
 use std::sync::{Mutex, MutexGuard};
 
+pub use service_provider::ServiceProvider;
+
+use crate::service_provider_extensions::ServiceProviderExtensions;
+
 pub mod service_provider;
 mod service_provider_extensions;
-
-pub use service_provider::ServiceProvider;
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum Error {
@@ -60,8 +61,12 @@ impl ServiceProvider for Container {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Container, ServiceProvider};
-    use std::sync::Arc;
+    use std::borrow::Borrow;
+    use std::sync::{Arc, Mutex, MutexGuard};
+
+    use totems::assert_err;
+
+    use crate::{Container, ServiceProvider, ServiceProviderExtensions};
 
     pub trait Animal {
         fn make_sound(&self);
@@ -85,5 +90,44 @@ mod tests {
         let animal2 = container.find::<Arc<dyn Animal + Sync + Send>>();
 
         assert!(animal2.is_ok())
+    }
+
+    #[derive(Default)]
+    struct ServiceProviderStub {
+        extensions: Mutex<ServiceProviderExtensions>,
+    }
+
+    impl ServiceProvider for ServiceProviderStub {
+        fn extensions(&self) -> MutexGuard<'_, ServiceProviderExtensions> {
+            self.extensions.borrow().lock().unwrap()
+        }
+    }
+
+    #[test]
+    fn empty_service_provider() {
+        let sp = ServiceProviderStub::default();
+
+        assert_err!(sp.find::<String>());
+        assert_err!(sp.find::<Arc<String>>());
+    }
+
+    #[test]
+    fn value_is_injected_by_type_not_by_value() {
+        let mut sp = ServiceProviderStub::default();
+        sp.inject("String".to_string());
+        sp.inject("Ae".to_string());
+
+        assert_eq!(sp.count(), 1);
+        assert_ne!(*sp.find::<String>().unwrap(), "String".to_string());
+        assert_eq!(*sp.find::<String>().unwrap(), "Ae".to_string());
+    }
+
+    #[test]
+    fn inject_arc() {
+        struct MyStub {}
+        let mut sp = ServiceProviderStub::default();
+        sp.inject(Arc::new(MyStub {}));
+
+        assert!(sp.find::<Arc<MyStub>>().is_ok());
     }
 }

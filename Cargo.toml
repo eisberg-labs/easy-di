@@ -18,3 +18,5 @@ path = "src/lib.rs"
 ahash = "0.7"
 thiserror = "1.0"
 
+[dev-dependencies]
+totems = "0.2.7"
