@@ -1,0 +1,20 @@
+[package]
+name = "easy-di"
+version = "1.0.0-beta.1"
+edition = "2018"
+authors = ["Ana Bujan <ana@eisberg-labs.com>"]
+readme = "README.md"
+repository = "https://github.com/eisberg-labs/easy-di"
+description = "Simple dependency injection container for Rust."
+keywords = ["dependency-injection", "inversion-of-control", "di", "ioc"]
+license = "MIT/Apache-2.0"
+include = ["src/", "LICENSE-*", "README.md"]
+
+[lib]
+name = "easy_di"
+path = "src/lib.rs"
+
+[dependencies]
+ahash = "0.7"
+thiserror = "1.0"
+
