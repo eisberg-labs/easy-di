@@ -34,7 +34,7 @@ pub use service_provider::ServiceProvider;
 use crate::service_provider_extensions::ServiceProviderExtensions;
 
 pub mod service_provider;
-mod service_provider_extensions;
+pub mod service_provider_extensions;
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum Error {
