@@ -1,5 +1,6 @@
-use crate::{Error, ServiceProviderExtensions};
 use std::sync::MutexGuard;
+
+use crate::{Error, ServiceProviderExtensions};
 
 type ServiceProviderResult<T> = Result<T, Error>;
 
@@ -16,7 +17,7 @@ pub trait ServiceProvider {
         self.extensions().insert(elem);
     }
 
-    /// Returns Some(`T`) if value already hashed, otherwise returns None.
+    /// Returns Ok(`T`) if value already hashed, otherwise returns Err.
     fn find<T>(&self) -> ServiceProviderResult<T>
     where
         T: 'static + Send + Sync + Clone,
